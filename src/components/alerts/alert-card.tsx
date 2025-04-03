@@ -9,18 +9,54 @@ import {
   Calendar, 
   MapPin, 
   Tags,
-  Clock
+  Clock,
+  MoreVertical,
+  Edit,
+  Trash2
 } from "lucide-react";
 import { Alert } from "@/lib/constants";
 import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
+import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AlertCardProps {
   alert: Alert;
+  onMarkAsRead?: () => void;
+  onMarkAsUnread?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export function AlertCard({ alert }: AlertCardProps) {
+export function AlertCard({ 
+  alert, 
+  onMarkAsRead, 
+  onMarkAsUnread,
+  onEdit,
+  onDelete
+}: AlertCardProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
   const alertDate = new Date(alert.timestamp);
   const timeAgo = formatDistanceToNow(alertDate, { addSuffix: true });
+
+  const handleReadToggle = () => {
+    if (alert.read) {
+      onMarkAsUnread?.();
+    } else {
+      onMarkAsRead?.();
+    }
+  };
+
+  const handleDelete = () => {
+    setIsDeleteDialogOpen(false);
+    onDelete?.();
+  };
 
   return (
     <Card className={alert.read ? "" : "border-l-4 border-l-primary"}>
@@ -39,9 +75,37 @@ export function AlertCard({ alert }: AlertCardProps) {
               {timeAgo}
             </div>
           </div>
-          {!alert.read && (
-            <span className="h-2 w-2 rounded-full bg-primary" title="Unread alert"></span>
-          )}
+          <div className="flex">
+            {!alert.read && (
+              <span className="h-2 w-2 rounded-full bg-primary" title="Unread alert"></span>
+            )}
+            {(onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 ml-2">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={onEdit}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Alert
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem 
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Alert
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pb-2">
@@ -71,18 +135,32 @@ export function AlertCard({ alert }: AlertCardProps) {
         </div>
       </CardContent>
       <CardFooter className="border-t pt-4 flex gap-2">
-        <Button variant={alert.read ? "outline" : "default"} className="flex-1">
-          <Bell className="mr-2 h-4 w-4" />
-          {alert.read ? "Mark as Unread" : "Mark as Read"}
-        </Button>
-        <Button 
-          variant="default" 
-          className="flex-1"
-        >
+        {onMarkAsRead && onMarkAsUnread && (
+          <Button 
+            variant={alert.read ? "outline" : "default"} 
+            className="flex-1"
+            onClick={handleReadToggle}
+          >
+            <Bell className="mr-2 h-4 w-4" />
+            {alert.read ? "Mark as Unread" : "Mark as Read"}
+          </Button>
+        )}
+        <Button variant="default" className="flex-1">
           <AlertTriangle className="mr-2 h-4 w-4" />
           Investigate
         </Button>
       </CardFooter>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete Alert"
+        description="Are you sure you want to delete this alert? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+      />
     </Card>
   );
 }

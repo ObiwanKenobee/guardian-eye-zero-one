@@ -1,53 +1,71 @@
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Team, Investigator } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Team, MOCK_INVESTIGATORS } from "@/lib/constants";
 
 interface TeamAssignmentTableProps {
   team: Team;
+  investigators?: Investigator[];
 }
 
-export function TeamAssignmentTable({ team }: TeamAssignmentTableProps) {
-  // Get all team members based on the team's member IDs
-  const teamMembers = MOCK_INVESTIGATORS.filter(investigator => 
-    team.memberIds.includes(investigator.id)
-  );
+export function TeamAssignmentTable({ team, investigators = [] }: TeamAssignmentTableProps) {
+  // Get team members
+  const teamMembers = investigators.filter(inv => team.memberIds.includes(inv.id));
+  
+  // Check if an investigator is the team lead
+  const isTeamLead = (investigatorId: string) => investigatorId === team.leadInvestigatorId;
 
   return (
-    <div>
-      <h3 className="text-sm font-medium mb-2">Team Members ({teamMembers.length})</h3>
+    <div className="border rounded-md overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead>Investigator</TableHead>
+            <TableHead>Role</TableHead>
             <TableHead>Specialization</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Location</TableHead>
             <TableHead>Active Cases</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {teamMembers.map((member) => (
             <TableRow key={member.id}>
-              <TableCell className="font-medium">{member.name}</TableCell>
+              <TableCell className="font-medium">
+                {member.name}
+                {isTeamLead(member.id) && (
+                  <Badge variant="outline" className="ml-2">
+                    Lead
+                  </Badge>
+                )}
+              </TableCell>
+              <TableCell>{isTeamLead(member.id) ? "Team Lead" : "Investigator"}</TableCell>
               <TableCell>{member.specialization}</TableCell>
               <TableCell>
                 <Badge 
-                  variant={member.status === "active" ? "default" : "secondary"}
-                  className="whitespace-nowrap"
+                  variant={member.status === "active" ? "default" : 
+                    member.status === "on-leave" ? "destructive" : "secondary"}
                 >
                   {member.status}
                 </Badge>
               </TableCell>
-              <TableCell>{member.location}</TableCell>
               <TableCell>{member.activeCases}</TableCell>
-              <TableCell className="text-right">
-                <Button variant="outline" size="sm">Reassign</Button>
-              </TableCell>
             </TableRow>
           ))}
+          
+          {teamMembers.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                No team members assigned
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
