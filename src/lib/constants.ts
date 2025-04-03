@@ -1,3 +1,4 @@
+
 // Types for our application
 export type RiskLevel = 'low' | 'medium' | 'high';
 
@@ -606,16 +607,3 @@ export const MOCK_ALERTS: Alert[] = [
     relatedViolationId: null
   }
 ];
-
-export const RISK_LEVEL_COLOR = {
-  low: 'bg-green-500',
-  medium: 'bg-amber-500',
-  high: 'bg-red-500'
-};
-
-export const STATUS_BADGES = {
-  pending: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  investigating: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
-  verified: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-};
