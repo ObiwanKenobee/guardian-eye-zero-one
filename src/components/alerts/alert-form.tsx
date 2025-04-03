@@ -174,7 +174,7 @@ export function AlertForm({ alert, onSubmit }: AlertFormProps) {
               <FormLabel>Related Violation</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value || ""}
+                defaultValue={field.value || undefined}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -182,7 +182,7 @@ export function AlertForm({ alert, onSubmit }: AlertFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {MOCK_VIOLATIONS.map((violation) => (
                     <SelectItem key={violation.id} value={violation.id}>
                       {violation.title} ({violation.company})
